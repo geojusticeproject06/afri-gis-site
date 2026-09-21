@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Afri-GIS — Mapping Africa. Informing the World.</title>
+<meta name="description" content="Afri-GIS is a university-powered geospatial intelligence network delivering GIS mapping, remote sensing, and applied research for governments, corporations, and institutions operating across Africa.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0A0A09;
+    --bg-2:#141412;
+    --bg-3:#1C1C19;
+    --paper:#F5F3EC;
+    --white:#F5F3EC;
+    --grey:#9C9C93;
+    --grey-dim:#6E6E66;
+    --line:#2B2B26;
+    --line-soft:#1E1E1B;
+    --red:#CE1126;
+    --red-deep:#9C0D1D;
+    --gold:#F4C21A;
+    --gold-deep:#C79A0E;
+    --green:#0E7A3D;
+    --green-deep:#0A5C2E;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0; background:var(--bg); color:var(--paper);
+    font-family:'Inter',sans-serif; line-height:1.65; font-size:16px;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,.display{ font-family:'Archivo Black',sans-serif; letter-spacing:-0.01em; }
+  .mono{ font-family:'JetBrains Mono',monospace; }
+  a{ color:inherit; }
+  ::selection{ background:var(--gold); color:var(--bg); }
+  :focus-visible{ outline:2px solid var(--gold); outline-offset:3px; }
+  img{ max-width:100%; display:block; }
+  .wrap{ max-width:1180px; margin:0 auto; padding:0 clamp(20px,4vw,56px); }
+  .tri-rule{ height:3px; display:flex; }
+  .tri-rule span{ flex:1; }
+  .tri-rule .r{ background:var(--red); }
+  .tri-rule .g{ background:var(--gold); }
+  .tri-rule .e{ background:var(--green); }
+
+  /* ---------- nav ---------- */
+  nav{
+    position:sticky; top:0; z-index:50;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px clamp(20px,4vw,56px);
+    background:rgba(10,10,9,0.88); backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
+  }
+  .nav-brand{ display:flex; align-items:center; gap:12px; }
+  .nav-brand img{ height:34px; width:auto; }
+  .nav-brand-text{ font-family:'Archivo Black',sans-serif; font-size:15px; letter-spacing:0.02em; }
+  .nav-links{ display:flex; gap:28px; align-items:center; }
+  .nav-links a{ font-size:14px; text-decoration:none; color:var(--grey); border-bottom:1px solid transparent; padding-bottom:2px; }
+  .nav-links a:hover{ color:var(--paper); border-color:var(--gold); }
+  .nav-cta{ background:var(--gold); color:var(--bg)!important; padding:9px 18px; font-weight:700; }
+  .nav-cta:hover{ background:#fff!important; }
+  @media (max-width:860px){ .nav-links a:not(.nav-cta){ display:none; } }
+
+  /* ---------- hero ---------- */
+  header.hero{ position:relative; padding:84px 0 56px; overflow:hidden; }
+  .grid-bg{
+    position:absolute; inset:0; z-index:0; pointer-events:none; opacity:0.5;
+    background-image:
+      linear-gradient(var(--line-soft) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line-soft) 1px, transparent 1px);
+    background-size:48px 48px;
+    -webkit-mask-image:linear-gradient(to bottom, black, transparent 85%);
+    mask-image:linear-gradient(to bottom, black, transparent 85%);
+  }
+  .hero-inner{ position:relative; z-index:1; }
+  .eyebrow{
+    font-family:'JetBrains Mono',monospace; font-size:12.5px; letter-spacing:0.12em; font-weight:600;
+    color:var(--gold); margin-bottom:22px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;
+  }
+  .eyebrow .dot{ width:6px; height:6px; background:var(--red); border-radius:50%; display:inline-block; }
+  h1.headline{
+    font-size:clamp(34px,5.2vw,64px); line-height:1.04; font-weight:400;
+    margin:0 0 26px; max-width:16ch;
+  }
+  .headline .a{ color:var(--red); }
+  .headline .b{ color:var(--gold); }
+  .headline .c{ color:var(--green); }
+  .sub{ font-size:17.5px; color:var(--grey); max-width:60ch; margin:0 0 32px; }
+  .hero-ctas{ display:flex; gap:14px; flex-wrap:wrap; margin-bottom:56px; }
+  .btn{ font-family:'Inter',sans-serif; font-size:14.5px; font-weight:700; padding:14px 24px; border:1.5px solid var(--paper); text-decoration:none; display:inline-block; }
+  .btn-solid{ background:var(--paper); color:var(--bg); }
+  .btn-solid:hover{ background:var(--gold); border-color:var(--gold); }
+  .btn-ghost{ background:transparent; color:var(--paper); }
+  .btn-ghost:hover{ border-color:var(--gold); color:var(--gold); }
+
+  /* opportunity/problem split */
+  .op-split{ display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--line); border:1px solid var(--line); }
+  .op-card{ background:var(--bg-2); padding:26px 28px; }
+  .op-card .tag{ font-family:'JetBrains Mono',monospace; font-size:11.5px; letter-spacing:0.08em; font-weight:600; margin-bottom:10px; }
+  .op-card.opp .tag{ color:var(--green); }
+  .op-card.prob .tag{ color:var(--red); }
+  .op-card p{ font-size:14.5px; color:var(--grey); margin:0; }
+  @media (max-width:720px){ .op-split{ grid-template-columns:1fr; } }
+
+  /* ---------- sections ---------- */
+  section{ padding:80px 0; border-top:1px solid var(--line); }
+  .section-head{ max-width:66ch; margin-bottom:44px; }
+  .eyebrow-sm{ font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--gold); font-weight:600; letter-spacing:0.08em; margin-bottom:12px; }
+  h2{ font-size:clamp(26px,3vw,38px); margin:0 0 14px; font-weight:400; line-height:1.15; }
+  .section-dek{ color:var(--grey); font-size:16px; max-width:64ch; }
+
+  /* pillars grid (What Is Afri-GIS) */
+  .pillars{ display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--line); border:1px solid var(--line); }
+  .pillar{ background:var(--bg-2); padding:26px 24px; }
+  .pillar .num{ font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--gold-deep); margin-bottom:14px; }
+  .pillar h3{ font-family:'Inter',sans-serif; font-size:16px; font-weight:700; margin:0 0 8px; }
+  .pillar p{ font-size:13.5px; color:var(--grey); margin:0; }
+  @media (max-width:900px){ .pillars{ grid-template-columns:1fr 1fr; } }
+  @media (max-width:540px){ .pillars{ grid-template-columns:1fr; } }
+
+  /* advantage table */
+  .adv-table{ border:1px solid var(--line); overflow:hidden; }
+  .adv-row{ display:grid; grid-template-columns:1fr 1fr; }
+  .adv-row + .adv-row{ border-top:1px solid var(--line); }
+  .adv-row.head .adv-cell{ font-family:'JetBrains Mono',monospace; font-size:11.5px; letter-spacing:0.08em; font-weight:700; padding:14px 22px; }
+  .adv-cell{ padding:18px 22px; font-size:14.5px; }
+  .adv-row.head .adv-cell:first-child{ color:var(--grey-dim); background:var(--bg-2); }
+  .adv-row.head .adv-cell:last-child{ color:var(--bg); background:var(--gold); }
+  .adv-row:not(.head) .adv-cell:first-child{ color:var(--grey); border-right:1px solid var(--line); }
+  .adv-row:not(.head) .adv-cell:last-child{ color:var(--paper); font-weight:600; }
+
+  /* services */
+  .services{ display:grid; grid-template-columns:repeat(2,1fr); gap:1px; background:var(--line); border:1px solid var(--line); }
+  .service{ background:var(--bg-2); padding:30px; }
+  .service .mark{ width:34px; height:34px; margin-bottom:18px; }
+  .service h3{ font-family:'Inter',sans-serif; font-size:19px; font-weight:700; margin:0 0 6px; }
+  .service .service-tag{ font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--gold); letter-spacing:0.06em; margin-bottom:14px; display:block; }
+  .service ul{ margin:0; padding-left:18px; font-size:14px; color:var(--grey); }
+  .service li{ margin-bottom:6px; }
+  @media (max-width:760px){ .services{ grid-template-columns:1fr; } }
+
+  /* process chain */
+  .process-chain{ display:grid; grid-template-columns:repeat(5,1fr); gap:14px; margin-bottom:36px; }
+  .proc-step{ background:var(--bg-2); border:1px solid var(--line); padding:20px 16px; text-align:center; position:relative; }
+  .proc-step .n{ font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--gold); margin-bottom:10px; }
+  .proc-step h4{ font-size:14.5px; margin:0 0 6px; font-weight:700; font-family:'Inter',sans-serif; }
+  .proc-step p{ font-size:12px; color:var(--grey); margin:0; }
+  .proc-arrow-chain{ display:flex; align-items:center; justify-content:center; gap:8px; flex-wrap:wrap; font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--grey); }
+  .proc-arrow-chain b{ color:var(--paper); font-weight:600; }
+  @media (max-width:900px){ .process-chain{ grid-template-columns:repeat(2,1fr); } }
+
+  /* map categories + industries */
+  .two-col-grids{ display:grid; grid-template-columns:1fr 1fr; gap:44px; }
+  .mini-grid{ display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--line); border:1px solid var(--line); }
+  .mini-cell{ background:var(--bg-2); padding:18px 20px; }
+  .mini-cell h4{ font-size:14px; margin:0 0 6px; font-family:'Inter',sans-serif; font-weight:700; color:var(--gold); }
+  .mini-cell p{ font-size:12.5px; color:var(--grey); margin:0; }
+  .col-label{ font-family:'JetBrains Mono',monospace; font-size:11.5px; letter-spacing:0.08em; color:var(--grey-dim); margin-bottom:14px; }
+  @media (max-width:860px){ .two-col-grids{ grid-template-columns:1fr; gap:36px; } }
+
+  /* case studies */
+  .case-grid{ display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--line); border:1px solid var(--line); }
+  .case{ background:var(--bg-2); padding:32px; }
+  .case-tag{ font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:0.08em; color:var(--red); font-weight:600; margin-bottom:12px; }
+  .case h3{ font-family:'Inter',sans-serif; font-size:20px; font-weight:700; margin:0 0 14px; }
+  .case-q{ font-size:14.5px; color:var(--paper); margin:0 0 18px; padding-left:14px; border-left:2px solid var(--gold); font-style:italic; }
+  .case-block{ margin-bottom:16px; }
+  .case-block .lbl{ font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--grey-dim); letter-spacing:0.06em; margin-bottom:8px; }
+  .case-block ul{ margin:0; padding-left:18px; font-size:13.5px; color:var(--grey); }
+  .case-block li{ margin-bottom:5px; }
+  .case-note{ font-size:13px; color:var(--gold); margin:16px 0 0; font-weight:600; }
+  @media (max-width:860px){ .case-grid{ grid-template-columns:1fr; } }
+
+  /* research triad */
+  .triad{ display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--line); border:1px solid var(--line); }
+  .triad-item{ background:var(--bg-2); padding:28px 24px; }
+  .triad-item .n{ font-family:'JetBrains Mono',monospace; font-size:11px; margin-bottom:12px; }
+  .triad-item:nth-child(1) .n{ color:var(--red); }
+  .triad-item:nth-child(2) .n{ color:var(--gold); }
+  .triad-item:nth-child(3) .n{ color:var(--green); }
+  .triad-item h3{ font-family:'Inter',sans-serif; font-size:16px; font-weight:700; margin:0 0 10px; }
+  .triad-item p{ font-size:13.5px; color:var(--grey); margin:0; }
+  @media (max-width:760px){ .triad{ grid-template-columns:1fr; } }
+
+  /* network */
+  .network-panel{ border:1px solid var(--line); background:var(--bg-2); padding:48px; text-align:center; }
+  .network-panel p{ max-width:60ch; margin:0 auto 28px; color:var(--grey); font-size:15px; }
+  .network-nodes{ display:flex; justify-content:center; gap:10px; flex-wrap:wrap; }
+  .network-node{ width:44px; height:44px; border:1.5px dashed var(--line); border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--grey-dim); }
+
+  /* why us */
+  .why-grid{ display:grid; grid-template-columns:repeat(5,1fr); gap:1px; background:var(--line); border:1px solid var(--line); }
+  .why-item{ background:var(--bg-2); padding:24px 18px; }
+  .why-item .num{ font-family:'JetBrains Mono',monospace; font-size:20px; color:var(--gold); margin-bottom:12px; }
+  .why-item h3{ font-family:'Inter',sans-serif; font-size:14.5px; font-weight:700; margin:0 0 8px; }
+  .why-item p{ font-size:12.5px; color:var(--grey); margin:0; }
+  @media (max-width:900px){ .why-grid{ grid-template-columns:repeat(2,1fr); } }
+  @media (max-width:540px){ .why-grid{ grid-template-columns:1fr; } }
+
+  /* deliverables + engagement */
+  .deliv-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--line); border:1px solid var(--line); margin-bottom:48px; }
+  .deliv-item{ background:var(--bg-2); padding:22px 18px; }
+  .deliv-item h4{ font-size:14px; margin:0 0 8px; font-family:'Inter',sans-serif; font-weight:700; }
+  .deliv-item p{ font-size:12.5px; color:var(--grey); margin:0; }
+  @media (max-width:860px){ .deliv-grid{ grid-template-columns:1fr 1fr; } }
+
+  .engage-tiers{ display:grid; grid-template-columns:repeat(4,1fr); gap:14px; }
+  .tier{ border:1px solid var(--line); padding:20px; }
+  .tier .t-num{ font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--gold); margin-bottom:10px; }
+  .tier h4{ font-size:15px; margin:0 0 8px; font-family:'Inter',sans-serif; font-weight:700; }
+  .tier p{ font-size:12.5px; color:var(--grey); margin:0; }
+  @media (max-width:900px){ .engage-tiers{ grid-template-columns:1fr 1fr; } }
+  @media (max-width:540px){ .engage-tiers{ grid-template-columns:1fr; } }
+
+  /* who we serve */
+  .serve-grid{ display:grid; grid-template-columns:repeat(5,1fr); gap:1px; background:var(--line); border:1px solid var(--line); }
+  .serve-item{ background:var(--bg-2); padding:22px 16px; }
+  .serve-item h4{ font-size:13.5px; margin:0 0 8px; font-family:'Inter',sans-serif; font-weight:700; color:var(--gold); }
+  .serve-item p{ font-size:11.5px; color:var(--grey); margin:0; }
+  @media (max-width:900px){ .serve-grid{ grid-template-columns:repeat(2,1fr); } }
+  @media (max-width:540px){ .serve-grid{ grid-template-columns:1fr; } }
+
+  /* five-step ladder */
+  .ladder{ display:flex; flex-direction:column; gap:1px; background:var(--line); border:1px solid var(--line); margin-bottom:28px; }
+  .rung{ background:var(--bg-2); padding:16px 24px; display:flex; align-items:center; gap:18px; }
+  .rung .n{ font-family:'Archivo Black',sans-serif; font-size:22px; color:var(--line); width:34px; flex-shrink:0; }
+  .rung:nth-child(1) .n{ color:var(--red); }
+  .rung:nth-child(2) .n{ color:#dd6620; }
+  .rung:nth-child(3) .n{ color:var(--gold); }
+  .rung:nth-child(4) .n{ color:#8fae2f; }
+  .rung:nth-child(5) .n{ color:var(--green); }
+  .rung span.label{ font-size:15px; font-weight:600; }
+  .ladder-note{ text-align:center; font-size:15px; color:var(--grey); font-style:italic; }
+
+  /* positioning */
+  .position-split{ display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--line); border:1px solid var(--line); margin-bottom:32px; }
+  .position-card{ background:var(--bg-2); padding:30px; }
+  .position-card .tag{ font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:0.08em; color:var(--gold); margin-bottom:14px; }
+  .position-card p{ font-size:14.5px; color:var(--grey); margin:0; }
+  .position-statement{ text-align:center; font-size:clamp(18px,2.2vw,24px); max-width:52ch; margin:0 auto; font-weight:600; }
+  @media (max-width:760px){ .position-split{ grid-template-columns:1fr; } }
+
+  /* CTA */
+  .cta-section{ text-align:center; padding:96px 0; }
+  .cta-section h2{ font-size:clamp(28px,4vw,44px); max-width:18ch; margin:0 auto 18px; }
+  .cta-section .sub{ margin:0 auto 36px; }
+  .cta-contacts{ display:flex; justify-content:center; gap:48px; flex-wrap:wrap; margin-top:48px; }
+  .cta-contact .lbl{ font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--grey-dim); letter-spacing:0.08em; margin-bottom:6px; }
+  .cta-contact a{ font-size:16px; text-decoration:none; color:var(--gold); font-weight:600; }
+  .cta-contact a:hover{ text-decoration:underline; }
+
+  footer{ border-top:1px solid var(--line); padding:32px 0; }
+  .foot-row{ display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; }
+  .foot-brand{ display:flex; align-items:center; gap:10px; font-size:13px; color:var(--grey-dim); }
+  .foot-brand img{ height:20px; width:auto; }
+  .foot-links{ display:flex; gap:20px; }
+  .foot-links a{ font-size:13px; color:var(--grey-dim); text-decoration:none; }
+  .foot-links a:hover{ color:var(--gold); }
+
+  @media (prefers-reduced-motion:reduce){ *{ transition:none!important; animation:none!important; } }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-brand">
+    <img src="assets/afrigis-logo.png" alt="Afri-GIS">
+    <span class="nav-brand-text">AFRI&#8209;GIS</span>
+  </div>
+  <div class="nav-links">
+    <a href="#services">Services</a>
+    <a href="#process">Process</a>
+    <a href="#cases">Case Studies</a>
+    <a href="#network">Network</a>
+    <a href="#contact" class="nav-cta">Start an Engagement</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="grid-bg"></div>
+  <div class="wrap hero-inner">
+    <div class="eyebrow"><span class="dot"></span>STRATEGIC GIS &middot; DATA ANALYTICS &middot; RESEARCH &middot; DECISION SUPPORT</div>
+    <h1 class="headline">Africa is changing. <span class="a">The</span> <span class="b">data</span> <span class="c">needs</span> to keep up.</h1>
+    <p class="sub">Africa represents some of the world's most significant opportunities — from infrastructure and energy to agriculture, mining, telecommunications, and urban development. Yet investment and policy decisions are too often made using fragmented, outdated, or difficult-to-access information.</p>
+    <div class="hero-ctas">
+      <a href="#contact" class="btn btn-solid">Start an Engagement</a>
+      <a href="#services" class="btn btn-ghost">See Our Capabilities</a>
+    </div>
+    <div class="op-split">
+      <div class="op-card opp">
+        <div class="tag">THE OPPORTUNITY</div>
+        <p>Rapid growth across energy, real estate, logistics, and public-sector modernization.</p>
+      </div>
+      <div class="op-card prob">
+        <div class="tag">THE PROBLEM</div>
+        <p>Decision-makers lack reliable, current, and geographically precise intelligence.</p>
+      </div>
+    </div>
+  </div>
+</header>
+<div class="tri-rule"><span class="r"></span><span class="g"></span><span class="e"></span></div>
+
+<section id="solution">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow-sm">THE SOLUTION</div>
+      <h2>Afri-GIS turns geographic data into actionable intelligence.</h2>
+      <p class="section-dek">Afri-GIS is a collaborative network of universities providing advanced GIS, geospatial analysis, research, and data intelligence services for governments and international organizations operating in Africa. The result: evidence-based intelligence designed for real-world decisions.</p>
+    </div>
+    <div class="pillars">
+      <div class="pillar">
+        <div class="num">01</div>
+        <h3>Academic Expertise</h3>
+        <p>Researchers, faculty, students, and subject-matter experts across disciplines.</p>
+      </div>
+      <div class="pillar">
+        <div class="num">02</div>
+        <h3>Geospatial Technology</h3>
+        <p>GIS mapping, remote sensing, spatial databases, and visualization.</p>
+      </div>
+      <div class="pillar">
+        <div class="num">03</div>
+        <h3>Local Knowledge</h3>
+        <p>Deep understanding of African markets, communities, institutions, and geography.</p>
+      </div>
+      <div class="pillar">
+        <div class="num">04</div>
+        <h3>Applied Research</h3>
+        <p>Independent analysis incorporated into strategic reports and decision-making.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="advantage">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow-sm">THE AFRI-GIS ADVANTAGE</div>
+      <h2>Maps. Reports. Research. Afri-GIS brings all three together.</h2>
+      <p class="section-dek">Traditional GIS firms provide maps. Traditional consultants provide reports. Universities provide research. We don't simply show clients where things are — we help them understand what the data means.</p>
+    </div>
+    <div class="adv-table">
+      <div class="adv-row head">
+        <div class="adv-cell">TRADITIONAL APPROACH</div>
+        <div class="adv-cell">AFRI-GIS</div>
+      </div>
+      <div class="adv-row"><div class="adv-cell">Maps</div><div class="adv-cell">Maps + intelligence</div></div>
+      <div class="adv-row"><div class="adv-cell">Generic datasets</div><div class="adv-cell">Custom data collection</div></div>
+      <div class="adv-row"><div class="adv-cell">Consultant analysis</div><div class="adv-cell">University-backed research</div></div>
+      <div class="adv-row"><div class="adv-cell">One geographic perspective</div><div class="adv-cell">Multi-university collaboration</div></div>
+      <div class="adv-row"><div class="adv-cell">Static deliverables</div><div class="adv-cell">Interactive and dynamic tools</div></div>
+      <div class="adv-row"><div class="adv-cell">Technical outputs</div><div class="adv-cell">Decision-ready reports</div></div>
+    </div>
+  </div>
+</section>
+
+<section id="services">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow-sm">OUR CORE SERVICES</div>
+      <h2>Geospatial intelligence from the ground up.</h2>
+    </div>
+    <div class="services">
+      <div class="service">
+        <svg class="mark" viewBox="0 0 34 34"><rect x="1" y="1" width="32" height="32" rx="5" fill="none" stroke="#F4C21A" stroke-width="1.5"/><path d="M8 24 L14 12 L20 18 L26 8" stroke="#F4C21A" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span class="service-tag">MAPPING &amp; VISUALIZATION</span>
+        <h3>GIS Mapping &amp; Visualization</h3>
+        <ul>
+          <li>Interactive maps &amp; land-use mapping</li>
+          <li>Infrastructure &amp; asset mapping</li>
+          <li>Demographic &amp; development opportunity mapping</li>
+        </ul>
+      </div>
+      <div class="service">
+        <svg class="mark" viewBox="0 0 34 34"><circle cx="17" cy="17" r="15" fill="none" stroke="#CE1126" stroke-width="1.5"/><circle cx="17" cy="17" r="4" fill="#CE1126"/><path d="M17 2 L17 8 M17 26 L17 32 M2 17 L8 17 M26 17 L32 17" stroke="#CE1126" stroke-width="1.5"/></svg>
+        <span class="service-tag">EARTH OBSERVATION</span>
+        <h3>Remote Sensing</h3>
+        <ul>
+          <li>Satellite imagery analysis</li>
+          <li>Land-cover classification</li>
+          <li>Environmental monitoring &amp; change detection</li>
+        </ul>
+      </div>
+      <div class="service">
+        <svg class="mark" viewBox="0 0 34 34"><rect x="4" y="20" width="5" height="10" fill="#0E7A3D"/><rect x="14" y="12" width="5" height="18" fill="#0E7A3D"/><rect x="24" y="4" width="5" height="26" fill="#F4C21A"/></svg>
+        <span class="service-tag">SPATIAL DATA &amp; ANALYTICS</span>
+        <h3>Spatial Data &amp; Analytics</h3>
+        <ul>
+          <li>Demographic &amp; market analysis</li>
+          <li>Location intelligence</li>
+          <li>Geographic risk assessment</li>
+        </ul>
+      </div>
+      <div class="service">
+        <svg class="mark" viewBox="0 0 34 34"><rect x="3" y="5" width="28" height="24" rx="2" fill="none" stroke="#F4C21A" stroke-width="1.5"/><path d="M8 12 H26 M8 17 H26 M8 22 H19" stroke="#F4C21A" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <span class="service-tag">RESEARCH &amp; DECISION SUPPORT</span>
+        <h3>Research &amp; Decision Support</h3>
+        <ul>
+          <li>Policy &amp; market intelligence</li>
+          <li>Feasibility analysis</li>
+          <li>Investment decision support</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="process">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow-sm">FROM DATA TO DECISION</div>
+      <h2>Every engagement follows a rigorous six-stage process.</h2>
+      <p class="section-dek">From defining the client's strategic question to delivering intelligence that drives action.</p>
+    </div>
+    <div class="process-chain">
+      <div class="proc-step"><div class="n">01 &middot; DEFINE</div><h4>The Question</h4><p>Client identifies the strategic question.</p></div>
+      <div class="proc-step"><div class="n">02 &middot; COLLECT</div><h4>The Data</h4><p>Gather geographic, demographic, economic data.</p></div>
+      <div class="proc-step"><div class="n">03 &middot; MAP</div><h4>The Geography</h4><p>Transform data into geographic information.</p></div>
+      <div class="proc-step"><div class="n">04 &middot; ANALYZE</div><h4>The Expertise</h4><p>Apply GIS and subject-matter expertise.</p></div>
+      <div class="proc-step"><div class="n">05 &middot; INTERPRET</div><h4>The Meaning</h4><p>Identify patterns, opportunities, and risks.</p></div>
+    </div>
+    <div class="proc-arrow-chain">
+      <b>Data</b>&nbsp;&rarr;&nbsp;<b>Map</b>&nbsp;&rarr;&nbsp;<b>Analysis</b>&nbsp;&rarr;&nbsp;<b>Intelligence</b>&nbsp;&rarr;&nbsp;<b>Action</b>
+    </div>
+  </div>
+</section>
+
+<section id="coverage">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow-sm">WHAT WE CAN MAP · APPLICATIONS</div>
+      <h2>One platform. Many applications.</h2>
+    </div>
+    <div class="two-col-grids">
+      <div>
+        <div class="col-label">WHAT WE CAN MAP</div>
+        <div class="mini-grid">
+          <div class="mini-cell"><h4>People</h4><p>Population, demographics, migration, workforce.</p></div>
+          <div class="mini-cell"><h4>Infrastructure</h4><p>Roads, ports, airports, rail, utilities, telecoms.</p></div>
+          <div class="mini-cell"><h4>Environment</h4><p>Water, agriculture, forests, climate, natural resources.</p></div>
+          <div class="mini-cell"><h4>Places</h4><p>Cities, communities, land, development patterns.</p></div>
+          <div class="mini-cell"><h4>Economy</h4><p>Businesses, markets, industrial areas, investment zones.</p></div>
+          <div class="mini-cell"><h4>Services</h4><p>Schools, hospitals, government facilities, financial services.</p></div>
+        </div>
+      </div>
+      <div>
+        <div class="col-label">APPLICATIONS ACROSS INDUSTRIES</div>
+        <div class="mini-grid">
+          <div class="mini-cell"><h4>Government</h4><p>Urban planning, public services, economic development, resource allocation.</p></div>
+          <div class="mini-cell"><h4>Energy</h4><p>Renewable siting, grid planning, solar/wind potential, energy access.</p></div>
+          <div class="mini-cell"><h4>Agriculture</h4><p>Land suitability, crop monitoring, irrigation, food security, supply chains.</p></div>
+          <div class="mini-cell"><h4>Mining &amp; Resources</h4><p>Resource mapping, environmental monitoring, community impact assessment.</p></div>
+          <div class="mini-cell"><h4>Real Estate</h4><p>Site selection, market analysis, demographics, infrastructure access.</p></div>
+          <div class="mini-cell"><h4>Int'l Business</h4><p>Market entry, location intelligence, supply chains, risk analysis.</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="cases">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow-sm">EXAMPLE ENGAGEMENTS</div>
+      <h2>What a question becomes in Afri-GIS's hands.</h2>
+    </div>
+    <div class="case-grid">
+      <div class="case">
+        <div class="case-tag">ENERGY DEVELOPMENT</div>
+        <h3>Where should we invest in renewable energy infrastructure?</h3>
+        <div class="case-block">
+          <div class="lbl">DATA INPUTS</div>
+          <ul>
+            <li>Solar irradiance &amp; wind resources</li>
+            <li>Existing electrical infrastructure</li>
+            <li>Population centers &amp; industrial demand</li>
+            <li>Land availability &amp; environmental constraints</li>
+            <li>Government planning zones</li>
+          </ul>
+        </div>
+        <div class="case-block">
+          <div class="lbl">AFRI-GIS RESULT</div>
+          <ul>
+            <li>Priority markets &amp; priority sites</li>
+            <li>Infrastructure requirements</li>
+            <li>Development risks</li>
+            <li>Investment opportunities</li>
+          </ul>
+        </div>
+        <p class="case-note">Afri-GIS isn't just producing a map — it's helping determine where capital should go.</p>
+      </div>
+      <div class="case">
+        <div class="case-tag">GOVERNMENT PLANNING</div>
+        <h3>How can we better understand where infrastructure investment is most needed?</h3>
+        <p class="case-q">Afri-GIS overlays population, income, road networks, schools, healthcare, utilities, and economic activity to produce a unified picture.</p>
+        <div class="case-block">
+          <div class="lbl">WHAT THE PICTURE REVEALS</div>
+          <ul>
+            <li><strong>Infrastructure gaps</strong> — where critical services and connectivity are absent.</li>
+            <li><strong>Underserved communities</strong> — populations lacking access to essential resources.</li>
+            <li><strong>Priority investment areas</strong> — supporting capital planning and grant applications.</li>
+            <li><strong>Development opportunities</strong> — high-potential zones for public and private investment.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="research">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow-sm">RESEARCH THAT GOES BEYOND THE MAP</div>
+      <h2>This is a critical Afri-GIS differentiator.</h2>
+      <p class="section-dek">We combine geospatial analysis with multidisciplinary university research — drawing on expertise across economics, public policy, environmental science, engineering, urban planning, agriculture, public health, sociology, political science, and data science.</p>
+    </div>
+    <div class="triad">
+      <div class="triad-item">
+        <div class="n">GIS TELLS US WHERE</div>
+        <h3>Precise Location</h3>
+        <p>Precise geographic data locates the issue on the ground.</p>
+      </div>
+      <div class="triad-item">
+        <div class="n">RESEARCH EXPLAINS WHY</div>
+        <h3>Root Cause</h3>
+        <p>Academic expertise contextualizes patterns and root causes.</p>
+      </div>
+      <div class="triad-item">
+        <div class="n">ANALYSIS DETERMINES WHAT'S NEXT</div>
+        <h3>Strategic Action</h3>
+        <p>Integrated findings drive strategic recommendations and decisions.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="network">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow-sm">THE AFRI-GIS NETWORK</div>
+      <h2>A network of universities. One integrated intelligence platform.</h2>
+    </div>
+    <div class="network-panel">
+      <p>Each partner university contributes specialized expertise — Afri-GIS integrates those capabilities into a unified client solution. The network is actively growing; partner institutions are announced as engagements are formalized.</p>
+      <div class="network-nodes">
+        <div class="network-node">U1</div>
+        <div class="network-node">U2</div>
+        <div class="network-node">U3</div>
+        <div class="network-node">U4</div>
+        <div class="network-node">+</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="why">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow-sm">WHY WORK WITH AFRI-GIS?</div>
+      <h2>Independent. Multidisciplinary. Africa-focused.</h2>
+    </div>
+    <div class="why-grid">
+      <div class="why-item"><div class="num">01</div><h3>Academic Credibility</h3><p>Projects supported by university researchers and subject-matter experts.</p></div>
+      <div class="why-item"><div class="num">02</div><h3>Multidisciplinary Expertise</h3><p>Complex problems examined from multiple academic perspectives simultaneously.</p></div>
+      <div class="why-item"><div class="num">03</div><h3>Local Perspective</h3><p>Regional knowledge and relationships conventional consultants lack.</p></div>
+      <div class="why-item"><div class="num">04</div><h3>Flexible Scale</h3><p>From a focused GIS analysis to a multi-country research initiative.</p></div>
+      <div class="why-item"><div class="num">05</div><h3>Knowledge Transfer</h3><p>Projects strengthen local data capabilities and institutional knowledge.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="deliverables">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow-sm">WHAT CLIENTS RECEIVE &middot; ENGAGEMENT MODEL</div>
+      <h2>We tailor the deliverable to the decision.</h2>
+      <p class="section-dek">Depending on the engagement, clients receive:</p>
+    </div>
+    <div class="deliv-grid">
+      <div class="deliv-item"><h4>Interactive GIS Dashboards</h4><p>Custom geographic databases and dynamic visualization tools.</p></div>
+      <div class="deliv-item"><h4>Maps &amp; Spatial Analysis</h4><p>Remote sensing analysis and location intelligence reports.</p></div>
+      <div class="deliv-item"><h4>Research Reports</h4><p>Policy, planning, and investment intelligence white papers.</p></div>
+      <div class="deliv-item"><h4>Executive Briefings</h4><p>Decision-support tools and strategic recommendations.</p></div>
+    </div>
+    <div class="col-label">OUR ENGAGEMENT MODEL — FROM A SINGLE PROJECT TO AN INTELLIGENCE PARTNERSHIP</div>
+    <div class="engage-tiers">
+      <div class="tier"><div class="t-num">TIER 1</div><h4>Project</h4><p>A specific geographic or analytical question answered with precision.</p></div>
+      <div class="tier"><div class="t-num">TIER 2</div><h4>Program</h4><p>Multiple projects addressing a broader development objective.</p></div>
+      <div class="tier"><div class="t-num">TIER 3</div><h4>Platform</h4><p>Ongoing GIS, data, and research capabilities embedded in your operations.</p></div>
+      <div class="tier"><div class="t-num">TIER 4</div><h4>Strategic Partnership</h4><p>Long-term intelligence relationship supporting decision-making.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="serve">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow-sm">WHO WE SERVE</div>
+      <h2>Governments, institutions, and capital allocators across Africa.</h2>
+    </div>
+    <div class="serve-grid">
+      <div class="serve-item"><h4>Governments</h4><p>National &middot; Regional &middot; Municipal &middot; Development Authorities</p></div>
+      <div class="serve-item"><h4>International Organizations</h4><p>Development institutions &middot; NGOs &middot; Multilateral organizations</p></div>
+      <div class="serve-item"><h4>Corporations</h4><p>Energy &middot; Mining &middot; Infrastructure &middot; Telecoms &middot; Manufacturing &middot; Logistics</p></div>
+      <div class="serve-item"><h4>Investors</h4><p>Private equity &middot; Infrastructure funds &middot; Impact investors &middot; Real estate investors</p></div>
+      <div class="serve-item"><h4>Development Partners</h4><p>Foundations &middot; Research organizations &middot; International development programs</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="positioning">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow-sm">A NEW MODEL FOR AFRICAN INTELLIGENCE</div>
+      <h2>Africa's future will be shaped by decisions made today.</h2>
+    </div>
+    <div class="ladder">
+      <div class="rung"><span class="n">1</span><span class="label">Better Data</span></div>
+      <div class="rung"><span class="n">2</span><span class="label">Better Analysis</span></div>
+      <div class="rung"><span class="n">3</span><span class="label">Better Research</span></div>
+      <div class="rung"><span class="n">4</span><span class="label">Better Understanding</span></div>
+      <div class="rung"><span class="n">5</span><span class="label">Better Decisions</span></div>
+    </div>
+    <p class="ladder-note">Afri-GIS connects all five.</p>
+  </div>
+</section>
+
+<section id="what-we-are">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow-sm">POSITIONING AFRI-GIS</div>
+      <h2>The map is the entry point, not the product.</h2>
+    </div>
+    <div class="position-split">
+      <div class="position-card">
+        <div class="tag">WHAT WE ARE</div>
+        <p>A university-powered geospatial intelligence network — combining maps, research, and multidisciplinary analysis into a single integrated platform.</p>
+      </div>
+      <div class="position-card">
+        <div class="tag">THE PRODUCT IS DECISION INTELLIGENCE</div>
+        <p>Clients don't come to Afri-GIS for a map. They come because they need to make a high-stakes decision — and they need the best possible intelligence to make it confidently.</p>
+      </div>
+    </div>
+    <p class="position-statement">A University Consortium for Geospatial Intelligence and Applied Research.</p>
+  </div>
+</section>
+
+<section id="contact" class="cta-section">
+  <div class="wrap">
+    <div class="eyebrow-sm" style="justify-content:center;display:flex;">GET IN TOUCH</div>
+    <h2>What question are you trying to answer?</h2>
+    <p class="sub" style="margin-left:auto;margin-right:auto;">Tell us where you are going. We'll help you understand what the data says about getting there.</p>
+    <a href="mailto:info@afri-gis.org" class="btn btn-solid">Reach Out to Begin Your Engagement</a>
+    <div class="cta-contacts">
+      <div class="cta-contact"><div class="lbl">WEBSITE</div><a href="https://www.afri-gis.org">www.afri-gis.org</a></div>
+      <div class="cta-contact"><div class="lbl">EMAIL</div><a href="mailto:info@afri-gis.org">info@afri-gis.org</a></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot-row">
+    <div class="foot-brand"><img src="assets/afrigis-logo.png" alt="">&copy; 2026 Afri-GIS. Mapping Africa. Informing the World.</div>
+    <div class="foot-links">
+      <a href="#services">Services</a>
+      <a href="#network">Network</a>
+      <a href="#contact">Contact</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
